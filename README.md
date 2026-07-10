@@ -13,8 +13,7 @@ The datasets used for this project is "Spam Email Datasets" from Kaggle, Github,
 https://www.kaggle.com/datasets/ashfakyeafi/spam-email-classification/data, https://figshare.com/articles/dataset/Seven_Phishing_Email_Datasets/25432108, 
 https://www.kaggle.com/datasets/jackksoncsie/spam-email-dataset, 
 https://github.com/MWiechmann/enron_spam_data/tree/master, 
-https://www.kaggle.com/datasets/tinu10kumar/sms-spam
-dataset?resource=download, 
+https://www.kaggle.com/datasets/tinu10kumar/sms-spam-dataset?resource=download, 
 https://www.kaggle.com/datasets/thedevastator/sms-spam-collection-a-more-diverse-dataset 
 
 **Setup instructions**
