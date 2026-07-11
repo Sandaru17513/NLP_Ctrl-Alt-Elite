@@ -13,7 +13,10 @@ from sklearn.metrics import (
 )
 
 from preprocessing import preprocess_text
-from feature_engineering import create_tfidf
+from feature_engineering import (
+    create_tfidf,
+    save_vectorizer
+)
 
 # Load Dataset
 df = pd.read_csv("data/email.csv")
@@ -59,6 +62,10 @@ vectorizer = create_tfidf()
 
 X_train_tfidf = vectorizer.fit_transform(X_train)
 X_test_tfidf = vectorizer.transform(X_test)
+
+# Save TF-IDF Vectorizer
+save_vectorizer(vectorizer)
+print("TF-IDF vectorizer saved successfully!")
 
 print("\nTF-IDF Shape (Train):", X_train_tfidf.shape)
 print("TF-IDF Shape (Test):", X_test_tfidf.shape)
