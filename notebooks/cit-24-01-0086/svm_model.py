@@ -32,7 +32,6 @@ df = df[df["Category"].isin(["ham", "spam"])]
 
 # Preprocess messages
 df["clean_text"] = df["Message"].apply(preprocess_text)
-
 print("\nPreprocessed Samples:")
 print(df[["Category", "clean_text"]].head())
 # Convert labels to numbers
