@@ -1,0 +1,15 @@
+flask
+tensorflow>=2.16.0
+scikit-learn
+numpy
+pandas
+matplotlib
+seaborn
+nltk
+spacy
+beautifulsoup4
+requests
+flask-cors
+transformers
+torch
+langdetect

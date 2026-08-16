@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spam Classifier — cit-24-01-0014</title>
+<style>
+  :root {
+    --ham: #1e7d4f;
+    --ham-bg: #e8f7ef;
+    --spam: #b3261e;
+    --spam-bg: #fbe9e8;
+    --ink: #1c1d1f;
+    --muted: #6b7076;
+    --border: #e2e4e8;
+    --bg: #f6f7f9;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+  .wrap { width: 100%; max-width: 720px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); margin: 0 0 28px; font-size: 0.95rem; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 110px;
+    resize: vertical;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+  }
+  textarea:focus { outline: 2px solid #6b7076; outline-offset: 1px; }
+
+  button {
+    margin-top: 14px;
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: default; }
+
+  .error {
+    color: var(--spam);
+    font-size: 0.9rem;
+    margin-top: 10px;
+    display: none;
+  }
+
+  .results {
+    display: none;
+    margin-top: 26px;
+    gap: 16px;
+    grid-template-columns: 1fr 1fr;
+  }
+  .results.show { display: grid; }
+
+  .result {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .result h3 {
+    margin: 0 0 12px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .label {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  .label.ham  { color: var(--ham);  background: var(--ham-bg); }
+  .label.spam { color: var(--spam); background: var(--spam-bg); }
+  .confidence { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
+
+  .agreement {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  @media (max-width: 560px) {
+    .results { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Spam Classifier</h1>
+    <p class="subtitle">cit-24-01-0014 — Logistic Regression vs LSTM</p>
+
+    <div class="card">
+      <label for="message"><strong>Message</strong></label>
+      <textarea id="message" placeholder="Paste or type a message to classify…"></textarea>
+      <div>
+        <button id="classify-btn" type="button">Classify</button>
+      </div>
+      <p class="error" id="error"></p>
+
+      <div class="results" id="results">
+        <div class="result">
+          <h3>Logistic Regression</h3>
+          <span class="label" id="lr-label"></span>
+          <div class="confidence" id="lr-confidence"></div>
+        </div>
+        <div class="result">
+          <h3>LSTM</h3>
+          <span class="label" id="lstm-label"></span>
+          <div class="confidence" id="lstm-confidence"></div>
+        </div>
+        <div class="agreement" id="agreement"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const btn = document.getElementById('classify-btn');
+  const textarea = document.getElementById('message');
+  const errorEl = document.getElementById('error');
+  const resultsEl = document.getElementById('results');
+
+  function setLabel(elId, label) {
+    const el = document.getElementById(elId);
+    el.textContent = label;
+    el.classList.remove('ham', 'spam');
+    el.classList.add(label.toLowerCase());
+  }
+
+  async function classify() {
+    const text = textarea.value.trim();
+    errorEl.style.display = 'none';
+    resultsEl.classList.remove('show');
+
+    if (!text) {
+      errorEl.textContent = 'Please enter a message.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Classifying…';
+
+    try {
+      const res = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Something went wrong.');
+      }
+
+      setLabel('lr-label', data.logistic_regression.label);
+      document.getElementById('lr-confidence').textContent =
+        `Confidence: ${data.logistic_regression.confidence}%`;
+
+      setLabel('lstm-label', data.lstm.label);
+      document.getElementById('lstm-confidence').textContent =
+        `Confidence: ${data.lstm.confidence}%`;
+
+      const agree = data.logistic_regression.label === data.lstm.label;
+      document.getElementById('agreement').textContent =
+        agree ? 'Both models agree.' : 'Models disagree.';
+
+      resultsEl.classList.add('show');
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Classify';
+    }
+  }
+
+  btn.addEventListener('click', classify);
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) classify();
+  });
+</script>
+</body>
+</html>
