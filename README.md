@@ -51,7 +51,7 @@ https://www.kaggle.com/datasets/thedevastator/sms-spam-collection-a-more-diverse
 
 ## How to run the project
 
-See [how_to_start.md](how_to_start.md) for detailed step-by-step instructions.
+See for detailed step-by-step instructions.
 
 Quick summary:
 ```powershell
