@@ -4,12 +4,15 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 def create_tfidf():
     """
-    Create TF-IDF Vectorizer
+    Create the TF-IDF vectorizer used by the SVM model.
     """
 
     vectorizer = TfidfVectorizer(
-        max_features=5000,
-        ngram_range=(1, 2)
+        max_features=10000,
+        ngram_range=(1, 2),
+        sublinear_tf=True,
+        min_df=2,
+        max_df=0.95
     )
 
     return vectorizer
@@ -17,32 +20,37 @@ def create_tfidf():
 
 def fit_transform(vectorizer, train_text):
     """
-    Learn vocabulary from training data
-    and transform training text.
+    Learn the vocabulary from training text
+    and transform the training text.
     """
 
     return vectorizer.fit_transform(train_text)
 
 
-def transform(vectorizer, test_text):
+def transform(vectorizer, text):
     """
-    Transform new text using trained TF-IDF.
+    Transform new text using the trained TF-IDF vectorizer.
     """
 
-    return vectorizer.transform(test_text)
+    return vectorizer.transform(text)
 
 
-def save_vectorizer(vectorizer, path="models/tfidf.pkl"):
+def save_vectorizer(
+    vectorizer,
+    path="models/cit-24-01-0086/tfidf.pkl"
+):
     """
-    Save TF-IDF model
+    Save the trained TF-IDF vectorizer.
     """
 
     joblib.dump(vectorizer, path)
 
 
-def load_vectorizer(path="models/tfidf.pkl"):
+def load_vectorizer(
+    path="models/cit-24-01-0086/tfidf.pkl"
+):
     """
-    Load saved TF-IDF model
+    Load the saved TF-IDF vectorizer.
     """
 
     return joblib.load(path)
